@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juz Tracker Pro</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f4fff4;
+padding:15px;
+}
+
+.header{
+background:linear-gradient(135deg,#0f9d58,#0b6e3f);
+color:white;
+padding:20px;
+border-radius:15px;
+text-align:center;
+margin-bottom:15px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+margin-bottom:15px;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:8px;
+}
+
+button{
+width:100%;
+padding:12px;
+border:none;
+border-radius:8px;
+background:#0f9d58;
+color:white;
+font-size:16px;
+margin-top:8px;
+cursor:pointer;
+}
+
+button:hover{
+background:#0b6e3f;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th{
+background:#0f9d58;
+color:white;
+padding:8px;
+}
+
+td{
+border:1px solid #ddd;
+padding:8px;
+text-align:center;
+}
+
+.stats{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.stat-box{
+flex:1;
+background:white;
+padding:15px;
+border-radius:12px;
+text-align:center;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.stat-box h2{
+color:#0f9d58;
+}
+
+@media(max-width:600px){
+.stats{
+flex-direction:column;
+}
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+<h1> Juz Tracker Pro</h1>
+<p>Markaz Khalfan Quran Academy</p>
+</div>
+
+<div class="stats">
+<div class="stat-box">
+<h2 id="completedCount">0</h2>
+<p>Completed</p>
+</div>
+
+<div class="stat-box">
+<h2 id="progressPercent">0%</h2>
+<p>Progress</p>
+</div>
+</div>
+
+<div class="card">
+
+<label>Date</label> <input type="date" id="date">
+
+<table>
+<thead>
+<tr>
+<th>Student</th>
+<th>Juz</th>
+</tr>
+</thead>
+<tbody id="studentTable"></tbody>
+</table>
+
+<button onclick="saveData()">💾 Save Records</button>
+
+</div>
+
+<div class="card">
+
+<h3>Search Records</h3>
+
+<input type="date" id="searchDate">
+
+<button onclick="searchByDate()">
+📅 Search By Date
+</button>
+
+<select id="studentSearch">
+<option value="">Select Student</option>
+</select>
+
+<button onclick="searchByStudent()">
+👤 Search By Student
+</button>
+
+<button onclick="viewData()">
+📋 View All Records
+</button>
+
+</div>
+
+<div class="card">
+
+<h3>Saved Records</h3>
+
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Student</th>
+<th>Juz</th>
+</tr>
+</thead>
+
+<tbody id="historyTable"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+const students = [
+"Ziyad",
+"Farhan ksd",
+"Shahas",
+"Farhan V T",
+"Hanan",
+"Danish",
+"Ameen",
+"Sayyid Fayiz",
+"Basith",
+"Luqman",
+"Iyas",
+"Salman",
+"Amil",
+"Sinan",
+"Midlaj"
+];
+
+document.getElementById("date").value=
+new Date().toISOString().split("T")[0];
+
+const table=document.getElementById("studentTable");
+
+students.forEach((student,index)=>{
+
+let options='<option value="">--</option>';
+
+for(let j=1;j<=30;j++){
+options+=`<option value="${j}">${j}</option>`;
+}
+
+table.innerHTML+=`
+<tr>
+<td>${student}</td>
+<td>
+<select id="juz${index}">
+${options}
+</select>
+</td>
+</tr>
+`;
+
+});
+
+const studentSearch=
+document.getElementById("studentSearch");
+
+students.forEach(student=>{
+studentSearch.innerHTML+=
+`<option value="${student}">
+${student}
+</option>`;
+});
+
+function updateStats(){
+
+let completed=0;
+
+students.forEach((student,index)=>{
+
+const juz=
+document.getElementById(`juz${index}`).value;
+
+if(juz){
+completed++;
+}
+
+});
+
+document.getElementById("completedCount")
+.innerText=completed;
+
+document.getElementById("progressPercent")
+.innerText=
+Math.round((completed/30)*100)+"%";
+
+}
+
+document.addEventListener("change",
+updateStats);
+
+function saveData(){
+
+const date=
+document.getElementById("date").value;
+
+let entries=[];
+
+students.forEach((student,index)=>{
+
+const juz=
+document.getElementById(`juz${index}`).value;
+
+if(juz){
+
+entries.push({
+date:date,
+student:student,
+juz:juz
+});
+
+}
+
+});
+
+localStorage.setItem(
+date,
+JSON.stringify(entries)
+);
+
+alert("Records Saved Successfully");
+
+}
+
+function viewData(){
+
+let historyTable=
+document.getElementById("historyTable");
+
+historyTable.innerHTML="";
+
+for(let i=0;i<localStorage.length;i++){
+
+let key=
+localStorage.key(i);
+
+let records=
+JSON.parse(
+localStorage.getItem(key)
+);
+
+records.forEach(record=>{
+
+historyTable.innerHTML+=`
+<tr>
+<td>${record.date}</td>
+<td>${record.student}</td>
+<td>${record.juz}</td>
+</tr>
+`;
+
+});
+
+}
+
+}
+
+function searchByDate(){
+
+const date=
+document.getElementById("searchDate").value;
+
+let historyTable=
+document.getElementById("historyTable");
+
+historyTable.innerHTML="";
+
+let records=
+JSON.parse(
+localStorage.getItem(date)
+);
+
+if(!records){
+alert("No Records Found");
+return;
+}
+
+records.forEach(record=>{
+
+historyTable.innerHTML+=`
+<tr>
+<td>${record.date}</td>
+<td>${record.student}</td>
+<td>${record.juz}</td>
+</tr>
+`;
+
+});
+
+}
+
+function searchByStudent(){
+
+const student=
+document.getElementById("studentSearch").value;
+
+let historyTable=
+document.getElementById("historyTable");
+
+historyTable.innerHTML="";
+
+let found=false;
+
+for(let i=0;i<localStorage.length;i++){
+
+let key=
+localStorage.key(i);
+
+let records=
+JSON.parse(
+localStorage.getItem(key)
+);
+
+records.forEach(record=>{
+
+if(record.student===student){
+
+found=true;
+
+historyTable.innerHTML+=`
+<tr>
+<td>${record.date}</td>
+<td>${record.student}</td>
+<td>${record.juz}</td>
+</tr>
+`;
+
+}
+
+});
+
+}
+
+if(!found){
+alert("No Records Found");
+}
+
+}
+
+</script>
+
+</body>
+</html>
